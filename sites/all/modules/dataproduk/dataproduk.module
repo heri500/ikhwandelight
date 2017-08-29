@@ -1,0 +1,364 @@
+<?php
+
+function dataproduk_menu() {
+	$items['dataproduk/kategori'] = array(
+    'title' => t('Kategori Produk'),
+    'description' => 'Manajemen Kategori Produk',
+		'page callback' => 'kategori_produk',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Kategori Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.kategori.inc'
+	);
+	$items['dataproduk/simpankategori'] = array(
+    'title' => t('Simpan Kategori Produk'),
+    'description' => 'Simpan Kategori Produk',
+		'page callback' => 'simpan_kategori',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Kategori Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.kategori.inc'
+	);
+	$items['dataproduk/updatekategori'] = array(
+    'title' => t('Update Kategori Produk'),
+    'description' => 'Update Kategori Produk',
+		'page callback' => 'update_kategori',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Kategori Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.kategori.inc'
+	);
+	$items['dataproduk/subkategori'] = array(
+    'title' => t('Subkategori Produk'),
+    'description' => 'Manajemen Subkategori Produk',
+		'page callback' => 'subkategori_produk',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Subkategori Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.subkategori.inc'
+	);
+	$items['dataproduk/produk'] = array(
+    'title' => t('Data Produk'),
+    'description' => 'Manajemen Data Produk',
+		'page callback' => 'data_produk',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/editproduk'] = array(
+    'title' => t('Edit Data Produk'),
+    'description' => 'Edit Data Produk',
+		'page callback' => 'edit_data_produk',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/filterkategori'] = array(
+    'title' => t('Filter Kategori'),
+    'description' => 'Filter Kategori',
+		'page callback' => 'filter_kategori',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/cekkodealternatif'] = array(
+    'title' => t('Cek Kode Alternatif'),
+    'description' => 'Cek Kode Alternatif',
+		'page callback' => 'cek_kode_alt',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/simpansubkategori'] = array(
+    'title' => t('Simpan Subkategori Produk'),
+    'description' => 'Simpan Subkategori Produk',
+		'page callback' => 'simpan_subkategori',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Subkategori Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.subkategori.inc'
+	);
+	$items['dataproduk/updatesubkategori'] = array(
+    'title' => t('Update Subkategori Produk'),
+    'description' => 'Update Subkategori Produk',
+		'page callback' => 'update_subkategori',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Subkategori Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.subkategori.inc'
+	);
+	$items['dataproduk/simpansatuan'] = array(
+    'title' => t('Simpan Satuan'),
+    'description' => 'Simpan Satuan Produk',
+		'page callback' => 'simpan_satuan',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/cekbarcode'] = array(
+    'title' => t('Cek Barcode'),
+    'description' => 'Cek Barcode',
+		'page callback' => 'cek_barcode',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/cekbarcode2'] = array(
+    'title' => t('Cek Barcode'),
+    'description' => 'Cek Barcode',
+		'page callback' => 'cek_barcode2',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	
+	$items['dataproduk/simpanproduk'] = array(
+    'title' => t('Simpan Data Produk'),
+    'description' => 'Simpan Data Produk',
+		'page callback' => 'simpan_produk',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+    $items['dataproduk/updateproduk'] = array(
+        'title' => t('Update Data Produk'),
+        'description' => 'Update Data Produk',
+        'page callback' => 'update_data_produk',
+        'access callback' => 'user_access',
+        'access arguments' => array('Admin Data Produk'),
+        'type' => MENU_CALLBACK,
+        'file' => 'globalpos.produk.inc'
+    );
+	$items['dataproduk/isitableproduk'] = array(
+    'title' => t('Tabel Produk'),
+    'description' => 'Tabel Data Produk',
+		'page callback' => 'tabel_produk',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/ubahstatusproduct'] = array(
+		'title' => t('Update Status Produk'),
+		'description' => 'Update Status Produk',
+		'page callback' => 'ubah_status_product',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Data Produk'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.produk.inc'
+	);
+	$items['dataproduk/meja'] = array(
+		'title' => t('Data Meja'),
+		'description' => 'Manajemen Data Meja',
+		'page callback' => 'meja',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Meja'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.meja.inc'
+	);
+	$items['dataproduk/simpanmeja'] = array(
+		'title' => t('Simpan Meja'),
+		'description' => 'Simpan Meja',
+		'page callback' => 'simpan_meja',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Meja'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.meja.inc'
+	);
+	$items['dataproduk/updatemeja'] = array(
+		'title' => t('Update Meja'),
+		'description' => 'Update Meja',
+		'page callback' => 'update_meja',
+		'access callback' => 'user_access',
+		'access arguments' => array('Admin Meja'),
+		'type' => MENU_CALLBACK,
+		'file' => 'globalpos.meja.inc'
+	);
+	return $items;
+} // end hook menu
+
+function dataproduk_perm() {
+	return array('Admin Kategori Produk','Admin Subkategori Produk','Admin Data Produk','Admin Meja');
+}
+/*
+	$array_to_js : array('key' => 'value')
+*/
+function php_to_drupal_settings($array_to_js){
+	drupal_add_js(array('globalpos' => $array_to_js), 'setting');
+}
+function cekUserRoles($rolestocek = array('administrasi'), $usertocek = null){
+	if (is_null($usertocek)){
+		global $user;
+		$usertocek = $user;	
+	}
+	$checkResults = false;
+	foreach ($usertocek->roles as $key => $role){
+		if (in_array($role, $rolestocek)){
+			$checkResults = true;
+		}	
+	}
+	if ($usertocek->uid == 1){
+		$checkResults = true;
+	}
+	return $checkResults;
+}
+function getLeadTime($idProduct = null){
+	$leadTime = 0;
+	if (!empty($idProduct)){
+		$leadTime = db_result(db_query("SELECT lead_time FROM product WHERE idproduct=%d",$idProduct));	
+	}
+	return $leadTime;
+}
+function calculateTakeTimeNormal($leadTime = null, $dateIn = null){
+	if (empty($dateIn)){
+		$dateIn = date('Y-m-d H:i');	
+	}
+	$takeTime = null;
+	if (!empty($leadTime)){
+		$splitDateTime = explode(' ',$dateIn);
+		$splitDate = explode('-',$splitDateTime[0]);
+		$splitTime = explode(':',$splitDateTime[1]);
+		$takeDay = date('w', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+		$takeHour = date('H', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+		$jamKerjaLaundry = JAM_KERJA_LAUNDRY();
+		if ($takeDay == 0){
+			if ((int)$takeHour > (int)$jamKerjaLaundry['minggu']['jam_keluar']){
+				$takeTimeOld = date('Y-m-d', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+				$splitTakeTime = explode('-', $takeTimeOld);
+				$takeTime = array();	
+				$takeTime[] = date('d-M-y H:i', mktime(7, 0, 0, $splitTakeTime[1],$splitTakeTime[2] + 1,$splitTakeTime[0]));
+				$takeTime[] = mktime(7, 0, 0, $splitTakeTime[1],$splitTakeTime[2] + 1,$splitTakeTime[0]);
+			}else{
+				$takeTime = array();	
+				$takeTime[] = date('d-M-y H:i', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+				$takeTime[] = mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]);
+			}
+		}else{
+			if ($takeHour > $jamKerjaLaundry['normal']['jam_keluar']){
+				$takeTimeOld = date('Y-m-d', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+				$splitTakeTime = explode('-', $takeTimeOld);
+				$takeTime = array();
+				$takeTime[] = date('d-M-y H:i', mktime(7, 0, 0, $splitTakeTime[1],$splitTakeTime[2] + 1,$splitTakeTime[0]));
+				$takeTime[] = mktime(7, 0, 0, $splitTakeTime[1],$splitTakeTime[2] + 1,$splitTakeTime[0]);
+			}else{
+				$takeTime = array();
+				$takeTime[] = date('d-M-y H:i', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+				$takeTime[] = mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]);
+			}
+		}
+	}
+	return $takeTime;
+}
+function calculateTakeTime($leadTime = null, $dateIn = null, $ikutJamKerja = false, $sebelumZuhur = false){
+	if (empty($dateIn)){
+		$dateIn = date('Y-m-d H:i');	
+	}
+	$takeTime = null;
+	if (!empty($leadTime)){
+		$splitDateTime = explode(' ',$dateIn);
+		$splitDate = explode('-',$splitDateTime[0]);
+		$splitTime = explode(':',$splitDateTime[1]);
+		$inDay = date('w', mktime($splitTime[0], $splitTime[1], 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+		$takeHour = date('H', mktime($splitTime[0], $splitTime[1] + $leadTime, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+		if ($ikutJamKerja && $sebelumZuhur){
+			if ($splitTime[0] > 12){
+				$newDateIn = date('Y-m-d H:i',mktime(7,0,0, $splitDate[1], (int)$splitDate[2] + 1, $splitDate[0]));
+				$takeTime = calculateTakeTime($leadTime, $newDateIn, $ikutJamKerja, false);
+			}else{
+				$takeTime = calculateTakeTime($leadTime, $dateIn, $ikutJamKerja, false);
+			}
+		}else if($ikutJamKerja && !$sebelumZuhur){
+			$jamKerjaLaundry = JAM_KERJA_LAUNDRY();
+			if ($inDay == 0){
+				$jamSelesai = $jamKerjaLaundry['minggu']['jam_keluar'];
+			}else{
+				$jamSelesai = $jamKerjaLaundry['normal']['jam_keluar'];
+			}
+			$jamMulai = $splitTime[0];
+			$jamKerja = $jamSelesai - $jamMulai;
+			$sisaJamKerja = $leadTime - $jamKerja;
+			if ($sisaJamKerja > 0){
+				 while ($sisaJamKerja > 0){
+				 	$nextDate = date('Y-m-d',mktime(0, 0, 0, $splitDate[1],$splitDate[2] + 1,$splitDate[0]));
+				 	$nextDay = date('w',mktime(0, 0, 0, $splitDate[1],$splitDate[2],$splitDate[0]));
+				 	if ($nextDay == 0){
+				 		$totalJamKerja = $jamKerjaLaundry['minggu']['total_jam'];
+						$jamMasuk = $jamKerjaLaundry['minggu']['jam_masuk'];
+				 	}else{
+				 		$totalJamKerja = $jamKerjaLaundry['normal']['total_jam'];
+				 		$jamMasuk = $jamKerjaLaundry['normal']['jam_masuk'];
+				 	}
+				 	$sisaSebelum = $sisaJamKerja;
+				 	$sisaJamKerja = $sisaJamKerja - $totalJamKerja;
+			        }
+			        $explodeTakeDate = explode('-',$nextDate);
+			        $takeTime[] = date('d-M-y H:i', mktime($jamMasuk, 0, 0, $explodeTakeDate[1],$explodeTakeDate[2],$explodeTakeDate[0]));
+			        $takeTime[] = mktime($jamMasuk, 0, 0, $explodeTakeDate[1],$explodeTakeDate[2],$explodeTakeDate[0]);	
+			}else{
+                $nextDate = date('Y-m-d',mktime($splitTime[0], $splitTime[1] + $leadTime, $splitTime[2], $splitDate[1],$splitDate[2],$splitDate[0]));
+				$explodeTakeDate = explode('-',$nextDate);
+                $nexTime =  date('H:i:s',mktime($splitTime[0], $splitTime[1]  + $leadTime, $splitTime[2], $splitDate[1],$splitDate[2],$splitDate[0]));
+				$explodeTakeTime = explode(':',$nexTime);
+				$takeTime[] = date('d-M-y H:i', mktime($explodeTakeTime[0], $explodeTakeTime[1], $explodeTakeTime[2], $explodeTakeDate[1],$explodeTakeDate[2],$explodeTakeDate[0]));
+			    $takeTime[] = mktime($explodeTakeTime[0], $explodeTakeTime[1], $explodeTakeTime[2], $explodeTakeDate[1],$explodeTakeDate[2],$explodeTakeDate[0]);
+			}
+		}else if(!$ikutJamKerja && $sebelumZuhur){
+			if ($splitTime[0] > 12){
+				$newDateIn = date('Y-m-d H:i',mktime(7,0,0, $splitDate[1], (int)$splitDate[2] + 1, $splitDate[0]));
+				$takeTime = calculateTakeTimeNormal($leadTime, $newDateIn);
+			}else{
+				$takeTime = calculateTakeTimeNormal($leadTime, $dateIn);
+			}
+		}else{
+			$takeTime = calculateTakeTimeNormal($leadTime, $dateIn);
+		}
+	}
+	return $takeTime;
+}
+function calculateTotalNilaiBarang($statusstok = null, $statusProduct = 1){
+	$strSQL = "SELECT SUM(stok*hargajual) AS total_stok FROM product WHERE 1=1 AND status_product= %d ";
+	$strCriteria = "";
+	if (!empty($statusstok)){
+		if ($statusstok == 'aman'){
+			$strCriteria .= "AND (stok >= minstok AND stok <= maxstok AND minstok != maxstok) ";
+		}else if($statusstok == 'maksimum'){
+			$strCriteria .= "AND (stok > maxstok) ";
+		}else if($statusstok == 'minimum'){
+			$strCriteria .= "AND (stok < minstok) ";
+		}
+	}
+	$strSQL .= $strCriteria;
+	$totalNilaiBarang = db_result(db_query($strSQL,$statusProduct));
+	return $totalNilaiBarang;
+}
+function get_updated_product(){
+	$strSQL = 'SELECT idproduct, idsupplier, idkategori, idsubkategori, barcode, ';
+	$strSQL .= 'alt_code, namaproduct, type_product, hargapokok, hargajual, margin, minstok, ';
+	$strSQL .= 'maxstok, stok, satuan, berat, keterangan, lead_time, aturan_jam_kerja, ';
+	$strSQL .= 'berlaku_sebelum_zuhur, status_product, uploaded, changed ';
+	$strSQL .= 'FROM product WHERE uploaded=0';
+	$result = db_query($strSQL);
+	$dataProduct = array();
+	while ($data = db_fetch_array($result)){
+		$dataProduct[] = $data;
+	}
+	return $dataProduct;
+}
+function generate_barcode_product(){
+	$strSQL = "SELECT idproduct FROM product WHERE barcode='' OR barcode IS NULL";
+	$result = db_query($strSQL);
+	$dataProduct = array();
+	while ($data = db_fetch_object($result)){
+		$barcode = createEAN13Code(getRandomString(9));
+		db_query("UPDATE product SET barcode='%s' WHERE idproduct=%d", $barcode, $data->idproduct);
+	}
+	return $dataProduct;
+}
