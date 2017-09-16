@@ -232,6 +232,7 @@ function akhiri_belanja(cetak){
 		request.perlakuankembalian = 0;
 	}
 	request.tgljual = $("#tgljualkirim").val();
+    request.idmeja = $("#idmeja").val();
 	if ((kembalian < 0 && $("#idpelanggan").val() != 0) || kembalian >= 0){
 		alamat = pathutama + "penjualan/simpanpenjualan";
 		$.ajax({
@@ -485,7 +486,7 @@ $(document).ready(function(){
             var kembaliView = parseFloat(kembali).toFixed(2);
 			$("#kembali").val(currSym +" "+ addCommas(kembaliView));
 			$("#nilaibayar").keyup();
-			$("#nilaibayar").select();
+            $('#nomormeja').select();
 			$("#idpelanggan").removeAttr("disabled");
             if ($("#idpelanggan").val() > 0) {
                 $("#baris-deposit").show();
@@ -535,35 +536,35 @@ $(document).ready(function(){
 	$("#dialogkasir").dialog("open");
 	$(".ui-dialog-titlebar").css("font-size","14px");
 	$("button").button();
-	$("#barcode").keypress(function(e) {
-		if (e.keyCode == 114){
-			$("#tombolubahqty").click();
-		}else if (e.keyCode == 13){
-			if ($("#barcode").val() != ""){
-				tambahproduk(1);
-			}else{
-				$("#pesantext").text("Mohon isi barcode atau kode produk atau nama produk yang ingin dicari...!!!");
-				$("#dialogwarning").dialog("open");
-			}
-		}else if (e.keyCode == 116) {
-			kirim_data(1);
-		}else if (e.keyCode == 117){
-			kirim_data(0);
-		}else if (e.keyCode == 115){
-			hapus_latest_produk();
-		}else if (e.keyCode == 119){
-			hitung_omset();
-		}else if (e.keyCode == 113){
-			if ($("#idpelanggan").val() == 0){
-				$("#tombolubahharga").click();
-			}else{
-				$("#pesantext").text("Perubahan harga hanya untuk pelanggan UMUM...!!!");
-				$("#dialogwarning").dialog("open");
-			}
-		}else if (e.keyCode == 120){
-			$('#idpelanggan').trigger('chosen:activate');
-		}
-	});
+    $("#barcode").keypress(function(e) {
+        if (e.keyCode == 114){
+            $("#tombolubahqty").click();
+        }else if (e.keyCode == 13){
+            if ($("#barcode").val() != ""){
+                tambahproduk(1);
+            }else{
+                $("#pesantext").text("Mohon isi barcode atau kode produk atau nama produk yang ingin dicari...!!!");
+                $("#dialogwarning").dialog("open");
+            }
+        }else if (e.keyCode == 117) {
+            kirim_data(1);
+        }else if (e.keyCode == 116){
+            kirim_data(0);
+        }else if (e.keyCode == 115){
+            hapus_latest_produk();
+        }else if (e.keyCode == 119){
+            hitung_omset();
+        }else if (e.keyCode == 113){
+            if ($("#idpelanggan").val() == 0){
+                $("#tombolubahharga").click();
+            }else{
+                $("#pesantext").text("Perubahan harga hanya untuk pelanggan UMUM...!!!");
+                $("#dialogwarning").dialog("open");
+            }
+        }else if (e.keyCode == 120){
+            $('#idpelanggan').trigger('chosen:activate');
+        }
+    });
 	$("#barcode").autocomplete({
 		source: pathutama + "penjualan/autocaribarang",
 		select: function (event, ui) {
@@ -747,5 +748,12 @@ $(document).ready(function(){
 		$("#dialogbayar").dialog('close');
 		$("#dialogbayar").dialog('open');
 	});
-
+    $('#nomormeja').autocomplete({
+        source: pathutama + "penjualan/autocarimeja",
+        select: function (event, ui) {
+            $("#nomormeja").val(ui.item.value);
+            $("#idmeja").val(ui.item.id);
+            $("#nilaibayar").select();
+        }
+    });
 })

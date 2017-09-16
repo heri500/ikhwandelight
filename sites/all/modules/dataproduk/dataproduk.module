@@ -353,12 +353,22 @@ function get_updated_product(){
 	return $dataProduct;
 }
 function generate_barcode_product(){
-	$strSQL = "SELECT idproduct FROM product WHERE barcode='' OR barcode IS NULL";
-	$result = db_query($strSQL);
-	$dataProduct = array();
-	while ($data = db_fetch_object($result)){
-		$barcode = createEAN13Code(getRandomString(9));
-		db_query("UPDATE product SET barcode='%s' WHERE idproduct=%d", $barcode, $data->idproduct);
-	}
-	return $dataProduct;
+    $strSQL = "SELECT idproduct FROM product WHERE barcode='' OR barcode IS NULL";
+    $result = db_query($strSQL);
+    $dataProduct = array();
+    while ($data = db_fetch_object($result)){
+        $barcodeExist = true;
+        while ($barcodeExist){
+            $barcode = createEAN13Code(getRandomString(9));
+            $strSQL = "SELECT COUNT(*) FROM product WHERE barcode='%s' LIMIT 1";
+            $barcodeExist = db_result(db_query($strSQL, $barcode));
+            if (empty($barcodeExist)){
+                $barcodeExist = false;
+            }else{
+                $barcodeExist = true;
+            }
+        }
+        db_query("UPDATE product SET barcode='%s' WHERE idproduct=%d", $barcode, $data->idproduct);
+    }
+    return $dataProduct;
 }

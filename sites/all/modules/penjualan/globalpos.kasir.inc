@@ -97,8 +97,8 @@ function penjualan($idtitipanlaundry = null, $alamatasal = null){
 	$tombolcari = '<a id="tombolubahharga" class="cari" onclick="ubahharga()">F2:UBAH HARGA</a>';
 	$tombolqty = '<a id="tombolubahqty" onclick="ubahqty()" class="buttonqty">F3:UBAH QTY</a>';
 	$tombolhapus = '<a class="buttonhapus" onclick="hapus_latest_produk()">F4:HAPUS ITEM</a>';
-	$tombolselesai = '<a class="buttonselesai" onclick="kirim_data(1)">F5:BAYAR&PRINT</a>';
-	$tombolprint = '<a class="buttonprint" onclick="kirim_data(0)">F6:BAYAR</a>';
+	$tombolselesai = '<a class="buttonselesai" onclick="kirim_data(0)">F5:BAYAR</a>';
+	$tombolprint = '<a class="buttonprint" onclick="kirim_data(1)">F6:BAYAR&PRINT</a>';
 	//$tomboltutupkasir = '<a class="buttontutup">F7:TUTUP KASIR</a>';
 	$tombollihatomset = '<a class="buttonomset" onclick="hitung_omset();">F8:TOTAL</a>';
     $tombollihatpelanggan = '<a class="buttonpelanggan" onclick="pilih_pelanggan();">F9:PELANGGAN</a>';
@@ -216,6 +216,14 @@ function penjualan($idtitipanlaundry = null, $alamatasal = null){
 	$kembali = '<input readonly="readonly" type="text" id="kembali" name="kembali">';
 	$totalbelanja = '<input type="text" id="totalbelanjauser" name="totalbelanjauser">';
 	//$penjualan .= '<div class="barisbayar"><label>Pelanggan</label>'.$pelanggan.'</div>';
+    if (isset($namaMeja) && isset($idMeja)){
+        $meja = '<input type="text" id="nomormeja" name="nomormeja" value="'.$namaMeja.'">';
+        $meja .= '<input type="hidden" id="idmeja" name="idmeja" value="'.$idMeja.'">';
+    }else {
+        $meja = '<input type="text" id="nomormeja" name="nomormeja">';
+        $meja .= '<input type="hidden" id="idmeja" name="idmeja">';
+    }
+    $penjualan .= '<div class="barisbayar"><label>Meja</label>'.$meja.'</div>';
 	$penjualan .= '<div class="barisbayar"><label>Total Belanja</label>'.$totalbelanja.'</div>';
 	$totalppn = '<input type="hidden" id="ppn_value" name="ppn_value" value="'.$dataPremis->ppn_value.'">';
 	$totalppn .= '<input type="text" id="total_ppn" name="total_ppn" value="0" disabled="disabled">';
@@ -234,168 +242,169 @@ function penjualan($idtitipanlaundry = null, $alamatasal = null){
 }
 
 function simpan_penjualan(){
-	//nonota, idpemakai, total, bayar, kembali
-	if (isset($_POST["detail_produk"]) AND isset($_POST["bayar"]) >= 0 AND
+    //nonota, idpemakai, total, bayar, kembali
+    if (isset($_POST["detail_produk"]) AND isset($_POST["bayar"]) >= 0 AND
         isset($_POST["totalbelanja"]) AND isset($_POST['totalbelanjappn'])
     ){
-		global $user;
-		//date_default_timezone_set('Asia/Jakarta');
-		$waktujual = $_POST["tgljual"]." ".date("H:i:s");
-		$splitTanggal = explode('-', $_POST["tgljual"]);
-		$splitJam = explode(':',date("H:i:s"));
-		$intTanggal = mktime($splitJam[0],$splitJam[1],$splitJam[2],$splitTanggal[1],$splitTanggal[2],$splitTanggal[0]);
-		$result = db_query("SELECT idpenjualan FROM penjualan ORDER BY idpenjualan DESC LIMIT 1");
-		$data = db_fetch_object($result);
-		if ($data->idpenjualan > 0){
-			$next_id = $data->idpenjualan + 1;
-		}else{
-			$next_id = 1;
-		}
-		$no_nota = buat_nota($next_id);
-		$kembali = $_POST["bayar"] - $_POST["totalbelanjappn"];
-		$perkuankembalian = isset($_POST["perlakuankembalian"]) ? $_POST["perlakuankembalian"] : 0;
-		$idtitipanlaundry = 0;
-		if (isset($_POST['idtitipanlaundry']) && !empty($_POST['idtitipanlaundry'])){
-			$idtitipanlaundry = $_POST['idtitipanlaundry'];
-		}
-		db_query("INSERT INTO penjualan (nonota, idpemakai, total, bayar, kembali, tglpenjualan, idpelanggan, 
-        carabayar, idtitipanlaundry, perlakuankembalian, ppn, total_plus_ppn) 
-		VALUES ('%s', '%d', '%f', '%f', '%f', '%s', '%d', '%s', '%d', '%d', '%f', '%f')",
-		$no_nota, $user->uid, $_POST["totalbelanja"], $_POST["bayar"], $kembali, $waktujual,
-		$_POST["idpelanggan"],$_POST["carabayar"], $idtitipanlaundry,$perkuankembalian,
-        $_POST["ppn"],$_POST["totalbelanjappn"]);
-		$next_id = db_last_insert_id('penjualan', 'idpenjualan');
-		print $next_id;
-		if ($kembali > 0 && $perkuankembalian == 2){
-			if (isset($_POST["idpelanggan"]) && !empty($_POST["idpelanggan"])){
-				$variables['idpelanggan'] = $_POST["idpelanggan"];
-				$variables['hutang'] = getTotalHutang($_POST["idpelanggan"]);
-				$variables['pembayaran'] = $kembali;
-				$variables['tglbayar'] = $waktujual;
-				$variables['idpenjualan'] = $next_id;
-				$variables['idtitipanlaundry'] = $idtitipanlaundry;
-				$variables['keterangan'] = 'Deposit Uang Dari Kembalian Nota Penjualan : '.$no_nota.' Tanggal : '.$waktujual;
-				pembayaranhutang($variables);	
-			}
-		}else if ($kembali < 0){
-			db_query("INSERT INTO detailpiutang (idpelanggan, idpenjualan, besarhutang) VALUES ('%d','%d','%f')",
-			$_POST["idpelanggan"],$next_id,abs($kembali));
-			$resultpiutang = db_query("SELECT idpelanggan, besarhutang  FROM piutang WHERE idpelanggan='%d'",
-			$_POST["idpelanggan"]);
-			$datapiutang = db_fetch_object($resultpiutang);
-			if ($datapiutang->idpelanggan){
-				$besarhutangskrg = $datapiutang->besarhutang + abs($kembali);
-				db_query("UPDATE piutang SET besarhutang='%f',uid='%d' WHERE idpelanggan='%d'",
-				$besarhutangskrg,$user->uid,$_POST["idpelanggan"]);
-			}else{
-				db_query("INSERT INTO piutang(idpelanggan,besarhutang,uid)VALUES('%d','%f','%d')",
-				$_POST["idpelanggan"],abs($kembali),$user->uid);	
-			}
-		}
-		if ($_POST["carabayar"] == "DEPOSIT"){
-			if (isset($_POST["idpelanggan"]) && !empty($_POST["idpelanggan"])){
-				$sisaDeposit = getTotalPembayaran($_POST["idpelanggan"]) - (getTotalHutang($_POST["idpelanggan"]) + getTotalPenggunaanDeposit($_POST["idpelanggan"]));
-				$variables['idpelanggan'] = $_POST["idpelanggan"];
-				$variables['deposit'] = $sisaDeposit;
-				$variables['penggunaan'] = $_POST["bayar"];
-				$variables['tglbayar'] = $waktujual;
-				$variables['keterangan'] = 'Penggunaan deposit untuk pembayaran nota : '.$no_nota.' Tanggal : '.$waktujual;
-				$variables['idpenjualan'] = $next_id;
-				penggunaandeposit($variables);
-				syncHutangPelanggan($_POST["idpelanggan"]);
-			}
-		}
-		$detailTitipanLaundry = null;
-		if (isset($_POST['idtitipanlaundry']) && !empty($_POST['idtitipanlaundry'])){
-			$result = db_query("SELECT iddetail, idproduct, sisa, diambil FROM 
+        global $user;
+        //date_default_timezone_set('Asia/Jakarta');
+        $waktujual = $_POST["tgljual"]." ".date("H:i:s");
+        $splitTanggal = explode('-', $_POST["tgljual"]);
+        $splitJam = explode(':',date("H:i:s"));
+        $intTanggal = mktime($splitJam[0],$splitJam[1],$splitJam[2],$splitTanggal[1],$splitTanggal[2],$splitTanggal[0]);
+        $result = db_query("SELECT idpenjualan FROM penjualan ORDER BY idpenjualan DESC LIMIT 1");
+        $data = db_fetch_object($result);
+        if ($data->idpenjualan > 0){
+            $next_id = $data->idpenjualan + 1;
+        }else{
+            $next_id = 1;
+        }
+        $no_nota = buat_nota($next_id);
+        $kembali = $_POST["bayar"] - $_POST["totalbelanjappn"];
+        $perkuankembalian = isset($_POST["perlakuankembalian"]) ? $_POST["perlakuankembalian"] : 0;
+        $idtitipanlaundry = 0;
+        if (isset($_POST['idtitipanlaundry']) && !empty($_POST['idtitipanlaundry'])){
+            $idtitipanlaundry = $_POST['idtitipanlaundry'];
+        }
+        $idMeja = $_POST['idmeja'];
+        db_query("INSERT INTO penjualan (nonota, idpemakai, total, bayar, kembali, tglpenjualan, idpelanggan, 
+        carabayar, idtitipanlaundry, perlakuankembalian, ppn, total_plus_ppn, idmeja) 
+		VALUES ('%s', '%d', '%f', '%f', '%f', '%s', '%d', '%s', '%d', '%d', '%f', '%f','%d')",
+            $no_nota, $user->uid, $_POST["totalbelanja"], $_POST["bayar"], $kembali, $waktujual,
+            $_POST["idpelanggan"],$_POST["carabayar"], $idtitipanlaundry,$perkuankembalian,
+            $_POST["ppn"],$_POST["totalbelanjappn"], $idMeja);
+        $next_id = db_last_insert_id('penjualan', 'idpenjualan');
+        print $next_id;
+        if ($kembali > 0 && $perkuankembalian == 2){
+            if (isset($_POST["idpelanggan"]) && !empty($_POST["idpelanggan"])){
+                $variables['idpelanggan'] = $_POST["idpelanggan"];
+                $variables['hutang'] = getTotalHutang($_POST["idpelanggan"]);
+                $variables['pembayaran'] = $kembali;
+                $variables['tglbayar'] = $waktujual;
+                $variables['idpenjualan'] = $next_id;
+                $variables['idtitipanlaundry'] = $idtitipanlaundry;
+                $variables['keterangan'] = 'Deposit Uang Dari Kembalian Nota Penjualan : '.$no_nota.' Tanggal : '.$waktujual;
+                pembayaranhutang($variables);
+            }
+        }else if ($kembali < 0){
+            db_query("INSERT INTO detailpiutang (idpelanggan, idpenjualan, besarhutang) VALUES ('%d','%d','%f')",
+                $_POST["idpelanggan"],$next_id,abs($kembali));
+            $resultpiutang = db_query("SELECT idpelanggan, besarhutang  FROM piutang WHERE idpelanggan='%d'",
+                $_POST["idpelanggan"]);
+            $datapiutang = db_fetch_object($resultpiutang);
+            if ($datapiutang->idpelanggan){
+                $besarhutangskrg = $datapiutang->besarhutang + abs($kembali);
+                db_query("UPDATE piutang SET besarhutang='%f',uid='%d' WHERE idpelanggan='%d'",
+                    $besarhutangskrg,$user->uid,$_POST["idpelanggan"]);
+            }else{
+                db_query("INSERT INTO piutang(idpelanggan,besarhutang,uid)VALUES('%d','%f','%d')",
+                    $_POST["idpelanggan"],abs($kembali),$user->uid);
+            }
+        }
+        if ($_POST["carabayar"] == "DEPOSIT"){
+            if (isset($_POST["idpelanggan"]) && !empty($_POST["idpelanggan"])){
+                $sisaDeposit = getTotalPembayaran($_POST["idpelanggan"]) - (getTotalHutang($_POST["idpelanggan"]) + getTotalPenggunaanDeposit($_POST["idpelanggan"]));
+                $variables['idpelanggan'] = $_POST["idpelanggan"];
+                $variables['deposit'] = $sisaDeposit;
+                $variables['penggunaan'] = $_POST["bayar"];
+                $variables['tglbayar'] = $waktujual;
+                $variables['keterangan'] = 'Penggunaan deposit untuk pembayaran nota : '.$no_nota.' Tanggal : '.$waktujual;
+                $variables['idpenjualan'] = $next_id;
+                penggunaandeposit($variables);
+                syncHutangPelanggan($_POST["idpelanggan"]);
+            }
+        }
+        $detailTitipanLaundry = null;
+        if (isset($_POST['idtitipanlaundry']) && !empty($_POST['idtitipanlaundry'])){
+            $result = db_query("SELECT iddetail, idproduct, sisa, diambil FROM 
 			detaillaundry WHERE idtitipanlaundry='%d' AND sisa > 0",$_POST['idtitipanlaundry']);
-			while ($data = db_fetch_object($result)){
-				$detailTitipanLaundry[$data->idproduct] = $data;
-			}
-		}else if (isset($_POST['idcustomerorder']) && !empty($_POST['idcustomerorder'])){
-			$result = db_query("SELECT id, idproduct, sisa, diambil FROM
+            while ($data = db_fetch_object($result)){
+                $detailTitipanLaundry[$data->idproduct] = $data;
+            }
+        }else if (isset($_POST['idcustomerorder']) && !empty($_POST['idcustomerorder'])){
+            $result = db_query("SELECT id, idproduct, sisa, diambil FROM
 			detailcustomerorder WHERE idcustomerorder='%d' AND sisa > 0",$_POST['idcustomerorder']);
-			while ($data = db_fetch_object($result)){
-				$detailCustomerOrder[$data->idproduct] = $data;
-			}
-		}
-		$pecahdetail = explode("&",$_POST["detail_produk"]);
-		$totalmodal = 0;
-		foreach ($pecahdetail as $parameter){
-			$pecahparameter = explode("=",$parameter);
-			$pecahnilai = explode("___",$pecahparameter[1]);
-			$IDPRODUK =	$pecahnilai[0];
-			$QTY = $pecahnilai[1];
-			$HARGAJUAL = $pecahnilai[2];
-			$DISKON = $pecahnilai[3];
-			$result = db_query("SELECT type_product, hargapokok,stok FROM product WHERE idproduct='%d'",$IDPRODUK);	
-			$data = db_fetch_object($result);
-			$HARGAPOKOK = $data->hargapokok;
-			$totalmodal = $totalmodal + ($HARGAPOKOK*$QTY);
-			$STOKSEBELUM = $data->stok;
-			db_query("INSERT INTO detailpenjualan(idpenjualan, idproduct, jumlah, hargapokok, hargajual, diskon) VALUES
+            while ($data = db_fetch_object($result)){
+                $detailCustomerOrder[$data->idproduct] = $data;
+            }
+        }
+        $pecahdetail = explode("&",$_POST["detail_produk"]);
+        $totalmodal = 0;
+        foreach ($pecahdetail as $parameter){
+            $pecahparameter = explode("=",$parameter);
+            $pecahnilai = explode("___",$pecahparameter[1]);
+            $IDPRODUK =	$pecahnilai[0];
+            $QTY = $pecahnilai[1];
+            $HARGAJUAL = $pecahnilai[2];
+            $DISKON = $pecahnilai[3];
+            $result = db_query("SELECT type_product, hargapokok,stok FROM product WHERE idproduct='%d'",$IDPRODUK);
+            $data = db_fetch_object($result);
+            $HARGAPOKOK = $data->hargapokok;
+            $totalmodal = $totalmodal + ($HARGAPOKOK*$QTY);
+            $STOKSEBELUM = $data->stok;
+            db_query("INSERT INTO detailpenjualan(idpenjualan, idproduct, jumlah, hargapokok, hargajual, diskon) VALUES
 			('%d', '%d', '%f', '%f', '%f', '%f')",
-			$next_id,$IDPRODUK,$QTY,$HARGAPOKOK,$HARGAJUAL,$DISKON);
-			if ($data->type_product == 0){
-				$STOKSEKARANG = $STOKSEBELUM - $QTY;
-				db_query("UPDATE product SET stok='%f' WHERE idproduct='%d'",$STOKSEKARANG,$IDPRODUK);
-				$KETERANGAN = 'Penjualan';
-				db_query("INSERT INTO transaksistock (idproduk, idpenjualan, stocksebelum, keluar, stocksetelah, keterangan) VALUES 
+                $next_id,$IDPRODUK,$QTY,$HARGAPOKOK,$HARGAJUAL,$DISKON);
+            if ($data->type_product == 0){
+                $STOKSEKARANG = $STOKSEBELUM - $QTY;
+                db_query("UPDATE product SET stok='%f' WHERE idproduct='%d'",$STOKSEKARANG,$IDPRODUK);
+                $KETERANGAN = 'Penjualan';
+                db_query("INSERT INTO transaksistock (idproduk, idpenjualan, stocksebelum, keluar, stocksetelah, keterangan) VALUES 
 				('%d', '%d', '%f', '%f', '%f', '%s')",$IDPRODUK,$next_id,$STOKSEBELUM,$QTY,$STOKSEKARANG,$KETERANGAN);
-			}
-			if (!empty($detailTitipanLaundry) && isset($detailTitipanLaundry[$IDPRODUK])){
-				if ($detailTitipanLaundry[$IDPRODUK]->sisa - $QTY <= 0){
-					$statusDetail = 2;
-				}else{
-					$statusDetail = 1;
-				}
-				$strSQL = "UPDATE detaillaundry SET sisa = sisa - %f, diambil = %d, status_laundry = %d WHERE iddetail = %d";	
-				db_query($strSQL, $QTY, $intTanggal, $statusDetail, $detailTitipanLaundry[$IDPRODUK]->iddetail);
-			}else if(!empty($detailCustomerOrder) && isset($detailCustomerOrder[$IDPRODUK])){
-				if ($detailCustomerOrder[$IDPRODUK]->sisa - $QTY <= 0){
-					$statusDetail = 2;
-				}else{
-					$statusDetail = 1;
-				}
-				$strSQL = "UPDATE detailcustomerorder SET sisa = sisa - %f, diambil = %d, status_order = %d WHERE id = %d";
-				db_query($strSQL, $QTY, $intTanggal, $statusDetail, $detailCustomerOrder[$IDPRODUK]->id);
-			}
-		}
-		if (isset($_POST['idtitipanlaundry']) && !empty($_POST['idtitipanlaundry'])){
-			$totalLaundry = db_result(db_query("SELECT COUNT(*) FROM detaillaundry WHERE idtitipanlaundry='%d'",$_POST['idtitipanlaundry']));
-			$totalSelesai = db_result(db_query("SELECT COUNT(*) FROM detaillaundry WHERE idtitipanlaundry='%d' AND status_laundry=2",$_POST['idtitipanlaundry']));
-			if ($totalSelesai > 0 && $totalSelesai == $totalLaundry){
-				$statusLaundry = 2;	
-			}else if($totalSelesai > 0 && $totalSelesai < $totalLaundry){
-				$statusLaundry = 1;	
-			}else{
-				$statusLaundry = 0;	
-			}
-			$strSQL = "UPDATE titipanlaundry SET status_laundry=%d WHERE idtitipanlaundry=%d";
-			db_query($strSQL, $statusLaundry, $_POST['idtitipanlaundry']);
-		}else if(isset($_POST['idcustomerorder']) && !empty($_POST['idcustomerorder'])){
-			$totalOrder = db_result(db_query("SELECT COUNT(*) FROM detailcustomerorder WHERE idcustomerorder='%d'",$_POST['idcustomerorder']));
-			$totalSelesai = db_result(db_query("SELECT COUNT(*) FROM detailcustomerorder WHERE idcustomerorder='%d' AND status_order=2",$_POST['idcustomerorder']));
-			if ($totalSelesai > 0 && $totalSelesai == $totalOrder){
-				$statusOrder = 2;
-			}else if($totalSelesai > 0 && $totalSelesai < $totalOrder){
-				$statusOrder = 1;
-			}else{
-				$statusOrder = 0;
-			}
-			$strSQL = "UPDATE customer_order SET status_order=%d WHERE id=%d";
-			db_query($strSQL, $statusOrder, $_POST['idcustomerorder']);
-		}
-		db_query("UPDATE penjualan SET totalmodal='%f' WHERE idpenjualan='%d'",$totalmodal,$next_id);
-		/*if (function_exists('is_connected') && is_connected()){
-			if (function_exists('do_upload_premisdata')){
-				do_upload_premisdata();
-			}
-		}*/
-	}else{
-		print 'error';	
-	}
-	exit();
+            }
+            if (!empty($detailTitipanLaundry) && isset($detailTitipanLaundry[$IDPRODUK])){
+                if ($detailTitipanLaundry[$IDPRODUK]->sisa - $QTY <= 0){
+                    $statusDetail = 2;
+                }else{
+                    $statusDetail = 1;
+                }
+                $strSQL = "UPDATE detaillaundry SET sisa = sisa - %f, diambil = %d, status_laundry = %d WHERE iddetail = %d";
+                db_query($strSQL, $QTY, $intTanggal, $statusDetail, $detailTitipanLaundry[$IDPRODUK]->iddetail);
+            }else if(!empty($detailCustomerOrder) && isset($detailCustomerOrder[$IDPRODUK])){
+                if ($detailCustomerOrder[$IDPRODUK]->sisa - $QTY <= 0){
+                    $statusDetail = 2;
+                }else{
+                    $statusDetail = 1;
+                }
+                $strSQL = "UPDATE detailcustomerorder SET sisa = sisa - %f, diambil = %d, status_order = %d WHERE id = %d";
+                db_query($strSQL, $QTY, $intTanggal, $statusDetail, $detailCustomerOrder[$IDPRODUK]->id);
+            }
+        }
+        if (isset($_POST['idtitipanlaundry']) && !empty($_POST['idtitipanlaundry'])){
+            $totalLaundry = db_result(db_query("SELECT COUNT(*) FROM detaillaundry WHERE idtitipanlaundry='%d'",$_POST['idtitipanlaundry']));
+            $totalSelesai = db_result(db_query("SELECT COUNT(*) FROM detaillaundry WHERE idtitipanlaundry='%d' AND status_laundry=2",$_POST['idtitipanlaundry']));
+            if ($totalSelesai > 0 && $totalSelesai == $totalLaundry){
+                $statusLaundry = 2;
+            }else if($totalSelesai > 0 && $totalSelesai < $totalLaundry){
+                $statusLaundry = 1;
+            }else{
+                $statusLaundry = 0;
+            }
+            $strSQL = "UPDATE titipanlaundry SET status_laundry=%d WHERE idtitipanlaundry=%d";
+            db_query($strSQL, $statusLaundry, $_POST['idtitipanlaundry']);
+        }else if(isset($_POST['idcustomerorder']) && !empty($_POST['idcustomerorder'])){
+            $totalOrder = db_result(db_query("SELECT COUNT(*) FROM detailcustomerorder WHERE idcustomerorder='%d'",$_POST['idcustomerorder']));
+            $totalSelesai = db_result(db_query("SELECT COUNT(*) FROM detailcustomerorder WHERE idcustomerorder='%d' AND status_order=2",$_POST['idcustomerorder']));
+            if ($totalSelesai > 0 && $totalSelesai == $totalOrder){
+                $statusOrder = 2;
+            }else if($totalSelesai > 0 && $totalSelesai < $totalOrder){
+                $statusOrder = 1;
+            }else{
+                $statusOrder = 0;
+            }
+            $strSQL = "UPDATE customer_order SET status_order=%d WHERE id=%d";
+            db_query($strSQL, $statusOrder, $_POST['idcustomerorder']);
+        }
+        db_query("UPDATE penjualan SET totalmodal='%f' WHERE idpenjualan='%d'",$totalmodal,$next_id);
+        /*if (function_exists('is_connected') && is_connected()){
+            if (function_exists('do_upload_premisdata')){
+                do_upload_premisdata();
+            }
+        }*/
+    }else{
+        print 'error';
+    }
+    exit();
 }
 function buat_nota($idpenjualan){
 	if ($idpenjualan > 0 AND $idpenjualan < 10){

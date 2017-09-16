@@ -52,16 +52,39 @@ function getDataPenjualan($nidpenjualan = null){
     $dataPenjualan = null;
     if (!empty($nidpenjualan)){
         $dataPenjualan = array();
-        $strSQL = "SELECT idpenjualan, name, nonota, tglpenjualan, idpemakai, a.idpelanggan, total,
-		totalmodal, carabayar, bayar, kembali, nokartu, keterangan, insert_date,idtitipanlaundry,
-		perlakuankembalian,namapelanggan,ppn, (total*(ppn/100)) AS ppn_value, total_plus_ppn FROM penjualan a LEFT JOIN cms_users b ON a.idpemakai = b.uid
-		LEFT JOIN pelanggan c ON a.idpelanggan = c.idpelanggan WHERE idpenjualan=%d";
+        $strSQL = "SELECT idpenjualan, name, nonota, tglpenjualan, a.idpemakai, a.idpelanggan, total,
+		totalmodal, carabayar, bayar, kembali, nokartu, a.keterangan, insert_date,idtitipanlaundry,
+		perlakuankembalian,namapelanggan,ppn, (total*(ppn/100)) AS ppn_value, total_plus_ppn, a.idmeja, d.meja 
+		FROM penjualan a 
+		LEFT JOIN cms_users b ON a.idpemakai = b.uid
+		LEFT JOIN pelanggan c ON a.idpelanggan = c.idpelanggan 
+		LEFT JOIN meja d ON a.idmeja = d.id
+		WHERE idpenjualan=%d";
         $result = db_query($strSQL,$nidpenjualan);
         $dataPenjualan['info'] = db_fetch_object($result);
+        $dataPenjualan['info']->tglorder = $dataPenjualan['info']->tglpenjualan;
         if (!empty($dataPenjualan['info']->idtitipanlaundry)){
             $dataPenjualan['laundry'] = getDataLaundry($dataPenjualan['info']->idtitipanlaundry);
         }
-        $dataPenjualan['detail'] = getDetailPenjualan($nidpenjualan);
+        $dataDetail = getDetailPenjualan($nidpenjualan);
+        $dataDetailNew = array();
+        for ($i = 0;$i < count($dataDetail);$i++){
+            $dataDetailNew[] = array(
+                'iddetail' => $dataDetail[$i]->iddetail,
+                'idpenjualan' => $dataDetail[$i]->idpenjualan,
+                'idproduct' => $dataDetail[$i]->idproduct,
+                'jumlah' => $dataDetail[$i]->jumlah,
+                'hargapokok' => $dataDetail[$i]->hargapokok,
+                'hargajual' => $dataDetail[$i]->hargajual,
+                'diskon' => $dataDetail[$i]->diskon,
+                'namaproduct' => $dataDetail[$i]->namaproduct,
+                'satuan' => $dataDetail[$i]->satuan,
+                'harga_diskon' => $dataDetail[$i]->harga_diskon,
+                'idkategori' => $dataDetail[$i]->idkategori,
+                'kategori' => $dataDetail[$i]->kategori,
+            );
+        }
+        $dataPenjualan['detail'] = $dataDetailNew;
         $dataPenjualan['detailbykategori'] = createDetailPenjualanByKategori($dataPenjualan['detail']);
     }
     return $dataPenjualan;
@@ -90,8 +113,8 @@ function createDetailPenjualanByKategori($detailPenjualan = null){
     if (count($detailPenjualan)){
         $kategoriInfo = array();
         for ($i = 0;$i < count($detailPenjualan);$i++){
-            $idkategori = $detailPenjualan[$i]->idkategori;
-            $kategoriInfo[$idkategori] = $detailPenjualan[$i]->kategori;
+            $idkategori = $detailPenjualan[$i]['idkategori'];
+            $kategoriInfo[$idkategori] = $detailPenjualan[$i]['kategori'];
             $penjualanByKategori[$idkategori][] = $detailPenjualan[$i];
         }
     }
@@ -906,7 +929,7 @@ function printOrderByCategory($dataOrder = null,$orderInfo = null){
         foreach($dataOrder[0] as $idxKategori => $categoryName){
             $tablePrint .= '<div>&nbsp;</div>';
             $tablePrint .= '<div>&nbsp;</div>';
-            $tablePrint .= '<table style="width: 240px;border-collapse: collapse;" >';
+            $tablePrint .= '<table style="width: 240px;border-collapse: collapse;" class="pagebreak">';
             $tablePrint .= '<tbody>';
             $tablePrint .= '<tr><td colspan="3" style="font-weight: bold;font-size: 14px;text-align: center;"><span style="float: left">KATEGORI</span><span style="float: right">'.strtoupper($categoryName).'</span></td></tr>';
             $tablePrint .= '<tr><td colspan="3" style="font-weight: bold;font-size: 14px;text-align: center;"><span style="float: left">NO. ORDER</span><span style="float: right">'.$orderInfo->nonota.'</span></td></tr>';
@@ -1050,6 +1073,26 @@ function getPremisInformation(){
 	}
 	return $dataPremis;
 }
+function printPenjualanDetail(){
+    drupal_add_js('misc/media/jquery-1.4.4.min.js');
+    $js_path = drupal_get_path('module','penjualan').'/js/direct.print.js';
+    _addBarcodePlugins();
+    drupal_add_js($js_path);
+    $js_path = drupal_get_path('module','penjualan').'/js/ghorder.barcode.js';
+    drupal_add_js($js_path);
+    $idPenjualan = isset($_GET['idpenjualangh']) ? $_GET['idpenjualangh'] : null;
+    $dataOrder = getDataPenjualan($idPenjualan);
+    $tablePrint = '';
+    if (count($dataOrder)){
+        $tablePrint = printKasirOrder($dataOrder);
+        $tablePrint .= '<div>&nbsp;</div>';
+        $tablePrint .= '<div class="pagebreak">&nbsp;</div>';
+        $tablePrint .= printKasirOrder($dataOrder);
+        $tablePrint .= printOrderByCategory($dataOrder['detailbykategori'],$dataOrder['info']);
+    }
+    db_query('UPDATE customer_order SET printed=1 WHERE id=%d', $idGhOrder);
+    return $tablePrint;
+}
 function cekPrinterCommand(){
 	$printOut = '';
 	if (isset($_GET['nidlaundry'])){
@@ -1077,7 +1120,7 @@ function cekPrinterCommand(){
 	}else if (isset($_GET['idghorderonly'])){
 		$printOut = printGHCOrderOnly();
 	}else if (isset($_GET['idpenjualangh'])){
-        $printOut = printOutPenjualanGHC();
+        $printOut = printPenjualanDetail();
     }
 	return $printOut;
 }
